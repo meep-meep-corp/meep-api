@@ -1,0 +1,7 @@
+image: python:3.6-stretch
+
+# Deploy stage
+
+deploy:
+  script:
+    - sls deploy
