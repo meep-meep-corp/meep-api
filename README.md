@@ -1,3 +1,5 @@
+# MEEP MEEP MOBILITY API
+
 Create a virtual environment with pyenv
 
 ```
@@ -10,4 +12,7 @@ Create a python environment file
 echo meep-meep-3.6.5 > .python.version
 ```
 
-Deploy to aws
+Deploy to aws (Configure locally your Serverless with your aws creds)
+```
+sls deploy
+```

@@ -1,7 +1,14 @@
 image: python:3.6-stretch
 
-# Deploy stage
+before_script:
+  - pip install -r requirements.txt
+  - curl -sL https://deb.nodesource.com/setup_10.x | bash -
+  - apt-get install -y nodejs
+  - npm i
+  - npm i -g serverless
 
 deploy:
   script:
     - sls deploy
+  only:
+    - master
