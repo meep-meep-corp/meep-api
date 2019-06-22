@@ -17,6 +17,7 @@ def createVehicle(id):
 def lock(code):
     try:
         vehicletype, provider, id = code.split(":", 3)
+        data = request.get_json(force=True)
         userid = data['user']
         response = table.get_item(Key = {'id': id})
     except ClientError as e:
@@ -45,8 +46,8 @@ def lock(code):
         else:
             return jsonify({'error':'You are not using this vehicle'}), 409
 
-@app.route('unlock/<string:id>', methods=['POST'])
-def unlock(id):
+@app.route('unlock/<string:code>', methods=['POST'])
+def unlock(code):
     try:
         vehicletype, provider, id = code.split(":", 3)
         print(request.get_json(force=True))
@@ -81,8 +82,4 @@ def unlock(id):
                     ReturnValues="UPDATED_NEW"
                 )
                 return jsonify({'message':'Vehicle unlocked, enjoy your trip!'}), 200
-
-@app.route('test', methods=['GET'])
-def test():
-    return jsonify({'scooters': table.scan(os.environ['VEHICLE_TABLE'])})
 

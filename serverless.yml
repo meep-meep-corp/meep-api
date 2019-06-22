@@ -23,6 +23,7 @@ provider:
         - "arn:aws:dynamodb:eu-central-1:712196630605:table/Trip-4adrckwckzhjzfl47kknke3uvm-dev"
         - "arn:aws:dynamodb:eu-central-1:712196630605:table/User-4adrckwckzhjzfl47kknke3uvm-dev"
         - "arn:aws:dynamodb:eu-central-1:712196630605:table/Vehicle-4adrckwckzhjzfl47kknke3uvm-dev"
+        - "arn:aws:dynamodb:eu-central-1:712196630605:table/Trip-4adrckwckzhjzfl47kknke3uvm-dev/index/gsi-UserTrips"
   environment:
     VEHICLE_TABLE: ${self:custom.vehicleTable}
     PROVIDER_TABLE: ${self:custom.providerTable}
@@ -46,3 +47,4 @@ functions:
     events:
       - http: ANY /
       - http: 'ANY {proxy+}'
+
