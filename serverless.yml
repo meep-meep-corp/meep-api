@@ -19,7 +19,7 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource:
-        - { "Fn::GetAtt": ["UsersDynamoDBTable", "Arn" ] }
+        - { "Fn::GetAtt": ["ScootersDBTable", "Arn" ] }
   environment:
     SCOOTERS_TABLE: ${self:custom.scooterTable}
     TRAINS_TABLE: ${self:custom.trainTable}
@@ -42,34 +42,18 @@ functions:
 
 resources:
   Resources:
-  - ScootersDBTable:
+    ScootersDBTable:
       Type: 'AWS::DynamoDB::Table'
       Properties:
-        AttributeDefinitions:
-          -
-            AttributeName: scooterId
-            AttributeType: S
-        KeySchema:
-          -
-            AttributeName: scooterId
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
         TableName: ${self:custom.scooterTable}
-
-  - TrainsDBTable:
-      Type: 'AWS::DynamoDB::Table'
-      Properties:
         AttributeDefinitions:
-          -
-            AttributeName: trainId
+          - AttributeName: scooterId
             AttributeType: S
         KeySchema:
-          -
-            AttributeName: trainId
+          - AttributeName: scooterId
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-        TableName: ${self:custom.trainTable}
+        
+
