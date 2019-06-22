@@ -42,7 +42,7 @@ functions:
 
 resources:
   Resources:
-  - UsersDynamoDBTable:
+  - ScootersDBTable:
       Type: 'AWS::DynamoDB::Table'
       Properties:
         AttributeDefinitions:
@@ -58,7 +58,7 @@ resources:
           WriteCapacityUnits: 1
         TableName: ${self:custom.scooterTable}
 
-  - UsersDynamoDBTable:
+  - TrainsDBTable:
       Type: 'AWS::DynamoDB::Table'
       Properties:
         AttributeDefinitions:
