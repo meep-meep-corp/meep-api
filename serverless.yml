@@ -19,12 +19,21 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource:
-        - { "Fn::GetAtt": ["VehicleDBTable", "Arn" ] }
+        - "arn:aws:dynamodb:eu-central-1:712196630605:table/Provider-4adrckwckzhjzfl47kknke3uvm-dev"
+        - "arn:aws:dynamodb:eu-central-1:712196630605:table/Trip-4adrckwckzhjzfl47kknke3uvm-dev"
+        - "arn:aws:dynamodb:eu-central-1:712196630605:table/User-4adrckwckzhjzfl47kknke3uvm-dev"
+        - "arn:aws:dynamodb:eu-central-1:712196630605:table/Vehicle-4adrckwckzhjzfl47kknke3uvm-dev"
   environment:
     VEHICLE_TABLE: ${self:custom.vehicleTable}
+    PROVIDER_TABLE: ${self:custom.providerTable}
+    USER_TABLE: ${self:custom.userTable}
+    TRIP_TABLE: ${self:custom.tripTable}
 
 custom:
   vehicleTable: 'Vehicle-4adrckwckzhjzfl47kknke3uvm-dev'
+  providerTable: 'Provider-4adrckwckzhjzfl47kknke3uvm-dev'
+  tripTable: 'Trip-4adrckwckzhjzfl47kknke3uvm-dev'
+  userTable: 'User-4adrckwckzhjzfl47kknke3uvm-dev'
   wsgi:
     app: api/app.app
     packRequirements: false
@@ -37,21 +46,3 @@ functions:
     events:
       - http: ANY /
       - http: 'ANY {proxy+}'
-
-resources:
-  Resources:
-    VehicleDBTable:
-      Type: 'AWS::DynamoDB::Table'
-      Properties:
-        TableName: ${self:custom.vehicleTable}
-        AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
-        KeySchema:
-          - AttributeName: id
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-        
-
