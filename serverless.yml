@@ -19,14 +19,12 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource:
-        - { "Fn::GetAtt": ["ScootersDBTable", "Arn" ] }
+        - { "Fn::GetAtt": ["VehicleDBTable", "Arn" ] }
   environment:
-    SCOOTERS_TABLE: ${self:custom.scooterTable}
-    TRAINS_TABLE: ${self:custom.trainTable}
+    VEHICLE_TABLE: ${self:custom.vehicleTable}
 
 custom:
-  scooterTable: 'scooters-table'
-  trainTable: 'trains-table'
+  vehicleTable: 'Vehicle-4adrckwckzhjzfl47kknke3uvm-dev'
   wsgi:
     app: api/app.app
     packRequirements: false
@@ -42,15 +40,15 @@ functions:
 
 resources:
   Resources:
-    ScootersDBTable:
+    VehicleDBTable:
       Type: 'AWS::DynamoDB::Table'
       Properties:
-        TableName: ${self:custom.scooterTable}
+        TableName: ${self:custom.vehicleTable}
         AttributeDefinitions:
-          - AttributeName: scooterId
+          - AttributeName: id
             AttributeType: S
         KeySchema:
-          - AttributeName: scooterId
+          - AttributeName: id
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
