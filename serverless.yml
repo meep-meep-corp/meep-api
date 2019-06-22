@@ -9,17 +9,67 @@ provider:
   runtime: python3.6
   stage: v1
   region: eu-central-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - { "Fn::GetAtt": ["UsersDynamoDBTable", "Arn" ] }
+  environment:
+    SCOOTERS_TABLE: ${self:custom.scooterTable}
+    TRAINS_TABLE: ${self:custom.trainTable}
 
 custom:
+  scooterTable: 'scooters-table'
+  trainTable: 'trains-table'
   wsgi:
     app: api/app.app
     packRequirements: false
   pythonRequirements:
     dockerizePip: non-linux
-
+    
 functions:
   app:
     handler: wsgi_handler.handler
     events:
       - http: ANY /
       - http: 'ANY {proxy+}'
+
+resources:
+  Resources:
+  - UsersDynamoDBTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: scooterId
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: scooterId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:custom.scooterTable}
+
+  - UsersDynamoDBTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: trainId
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: trainId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:custom.trainTable}
