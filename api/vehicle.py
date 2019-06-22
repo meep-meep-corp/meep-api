@@ -5,10 +5,8 @@ from botocore.exceptions import ClientError
 from flask import Blueprint, Response, jsonify, request
 
 app = Blueprint('vehicle', __name__, url_prefix='/vehicle')
-dbclient = boto3.client('dynamodb', region_name='eu-central-1')
-# dynamodb = boto3.resource('dynamodb', region_name='eu-central-1')
-# table = dynamodb.Table(os.environ['VEHICLE_TABLE'])
-VEHICLE_TABLE = os.environ['VEHICLE_TABLE']
+dynamodb = boto3.resource('dynamodb', region_name='eu-central-1')
+table = dynamodb.Table(os.environ['VEHICLE_TABLE'])
 
 @app.route('create/<string:id>', methods=['POST'])
 def createVehicle(id):
@@ -19,35 +17,7 @@ def createVehicle(id):
 def lock(code):
     try:
         vehicletype, provider, id = code.split(":", 3)
-        print(vehicletype)
-        print(provider)
-        print(id)
-        print(request.get_json(force=True))
-        response = dbclient.get_item(TableName=VEHICLE_TABLE, Key={'id': id})
-    except ClientError as e:
-        # Vehicle doesn't exist in our database
-        return jsonify({'error':'This vehicle cannot be recognized'}), 404
-    else:
-        # Vehicle found
-        vehicle = response['Item']
-        # Check the status
-        if vehicle['status'] != 'AVAILABLE':
-            # Vehicle is not available for use
-            return jsonify({'error':'This vehicle is not available to use'}), 409
-        else:
-            # Vehicle can be rent. Call provider's api to check the status
-            # (Mocked response from provider)
-            response = {'id': id, 'status': 'AVAILABLE'}
-            if response['status'] != 'AVAILABLE':
-                return jsonify({'error':'This vehicle is not available to use'}), 409
-            else:
-                return jsonify({'message':'Vehicle unlocked, enjoy your trip!'}), 200
-
-    return jsonify({'message':'Vehicle unlocked, enjoy your trip!'}), 400
-
-@app.route('unlock/<string:id>', methods=['POST'])
-def unlock(id):
-    try:
+        userid = data['user']
         response = table.get_item(Key = {'id': id})
     except ClientError as e:
         # Vehicle doesn't exist in our database
@@ -60,16 +30,59 @@ def unlock(id):
             # Vehicle is not locked
             if (vehicle['user'] != userid):
                 # Vehicle is not being currently used by this user
-                return 0
+                return jsonify({'error':'You are not using this vehicle'}), 409
             else:
                 # All right, lock the vehicle
-                return 0
+                # TODO: Check this using Blockchain
+                response = table.update_item(
+                    Key={'id': str(id)},
+                    UpdateExpression='SET #st = :val',
+                    ExpressionAttributeValues={":val": "AVAILABLE"},
+                    ExpressionAttributeNames={"#st": "status"},
+                    ReturnValues="UPDATED_NEW"
+                )
+                return jsonify({'message':'Trip finished!'}), 200
         else:
+            return jsonify({'error':'You are not using this vehicle'}), 409
 
-            return 0
-
+@app.route('unlock/<string:id>', methods=['POST'])
+def unlock(id):
+    try:
+        vehicletype, provider, id = code.split(":", 3)
+        print(request.get_json(force=True))
+        response = table.get_item(
+            Key={'id': str(id)}
+        )
+        print(response)
+    except ClientError as e:
+        # Vehicle doesn't exist in our database
+        return jsonify({'error':'This vehicle cannot be recognized'}), 404
+    else:
+        # Vehicle found
+        vehicle = response['Item']
+        # Check the status
+        print(vehicle['status'])
+        if vehicle['status'] != 'AVAILABLE':
+            # Vehicle is not available for use
+            return jsonify({'error':'This vehicle is not available to use'}), 409
+        else:
+            # Vehicle can be used. Call provider's api to check the status
+            # (Mocked response from provider)
+            # TODO: Check this using Blockchain
+            providerResponse = {'id': id, 'status': 'AVAILABLE'}
+            if providerResponse['status'] != 'AVAILABLE':
+                return jsonify({'error':'This vehicle is not available to use'}), 409
+            else:
+                response = table.update_item(
+                    Key={'id': str(id)},
+                    UpdateExpression='SET #st = :val',
+                    ExpressionAttributeValues={":val": "LOCKED"},
+                    ExpressionAttributeNames={"#st": "status"},
+                    ReturnValues="UPDATED_NEW"
+                )
+                return jsonify({'message':'Vehicle unlocked, enjoy your trip!'}), 200
 
 @app.route('test', methods=['GET'])
 def test():
-    return jsonify({'scooters': dbclient.scan(VEHICLE_TABLE)})
+    return jsonify({'scooters': table.scan(os.environ['VEHICLE_TABLE'])})
 
