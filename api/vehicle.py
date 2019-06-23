@@ -1,6 +1,9 @@
 
 import os
 import boto3
+import requests
+import time
+import json
 from botocore.exceptions import ClientError
 from flask import Blueprint, Response, jsonify, request
 from utils import distanceInKmBetweenCoordinates, carbonFootprint, costOfTransport
@@ -24,22 +27,27 @@ def lock(code):
         # Vehicle found
         vehicle = response['Item']
         # Check the status
-        if vehicle['status'] != 'LOCKED':
-            # Vehicle is not locked
-            if (vehicle['user'] != userid):
-                # Vehicle is not being currently used by this user
-                return jsonify({'error':'You are not using this vehicle'}), 409
-            else:
-                # All right, lock the vehicle
-                # TODO: Check this using Blockchain
-                response = vehicleTable.update_item(
-                    Key={'id': str(id)},
-                    UpdateExpression='SET #st = :val',
-                    ExpressionAttributeValues={":val": "AVAILABLE"},
-                    ExpressionAttributeNames={"#st": "status"},
-                    ReturnValues="UPDATED_NEW"
-                )
-                return jsonify({'message':'Trip finished!'}), 200
+        if vehicle['status'] == 'LOCKED':
+            # Vehicle is not locked, lock the vehicle and register the operation in the blockchain
+            requests.post(os.environ['BLOCKCHAIN_URL'], json=json.dumps({
+                "donorUserName": time.time(),
+                "vehicle": {
+                    "id": id, 
+                    "type": vehicle['type']
+                },
+                "coords": vehicle['location'],
+                "time": int(time.time()),
+                "user": userid,
+                "provider": provider}), headers={'content-type': 'application/json'})
+            
+            response = vehicleTable.update_item(
+                Key={'id': str(id)},
+                UpdateExpression='SET #st = :val, #us = :user',
+                ExpressionAttributeValues={":val": "AVAILABLE", ":user": userid},
+                ExpressionAttributeNames={"#st": "status", "#us": "user"},
+                ReturnValues="UPDATED_NEW"
+            )
+            return jsonify({'message':'Trip finished!'}), 200
         else:
             return jsonify({'error':'You are not using this vehicle'}), 409
 
@@ -62,9 +70,18 @@ def unlock(code):
             # Vehicle is not available for use
             return jsonify({'error':'This vehicle is not available to use'}), 409
         else:
-            # Vehicle can be used. Call provider's api to check the status
-            # (Mocked response from provider)
-            # TODO: Check this using Blockchain
+            # Call blockchain to register the operation
+            requests.post(os.environ['BLOCKCHAIN_URL'], json=json.dumps({
+                "donorUserName": time.time(),
+                "vehicle": {
+                    "id": id, 
+                    "type": vehicle['type']
+                },
+                "coords": vehicle['location'],
+                "time": int(time.time()),
+                "user": userid,
+                "provider": provider}), headers={'content-type': 'application/json'})
+
             providerResponse = {'id': id, 'status': 'AVAILABLE'}
             if providerResponse['status'] != 'AVAILABLE':
                 return jsonify({'error':'This vehicle is not available to use'}), 409

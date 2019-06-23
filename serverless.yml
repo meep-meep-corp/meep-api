@@ -29,12 +29,14 @@ provider:
     PROVIDER_TABLE: ${self:custom.providerTable}
     USER_TABLE: ${self:custom.userTable}
     TRIP_TABLE: ${self:custom.tripTable}
+    BLOCKCHAIN_URL: ${self:custom.blockchainUrl}
 
 custom:
   vehicleTable: 'Vehicle-4adrckwckzhjzfl47kknke3uvm-dev'
   providerTable: 'Provider-4adrckwckzhjzfl47kknke3uvm-dev'
   tripTable: 'Trip-4adrckwckzhjzfl47kknke3uvm-dev'
   userTable: 'User-4adrckwckzhjzfl47kknke3uvm-dev'
+  blockchainUrl: 'http://ec2-34-228-255-113.compute-1.amazonaws.com:3000/donors'
   wsgi:
     app: api/app.app
     packRequirements: false
