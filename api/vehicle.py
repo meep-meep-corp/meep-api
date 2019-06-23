@@ -3,15 +3,12 @@ import os
 import boto3
 from botocore.exceptions import ClientError
 from flask import Blueprint, Response, jsonify, request
+from utils import distanceInKmBetweenCoordinates, carbonFootprint, costOfTransport
 
 app = Blueprint('vehicle', __name__, url_prefix='/vehicle')
 dynamodb = boto3.resource('dynamodb', region_name='eu-central-1')
-table = dynamodb.Table(os.environ['VEHICLE_TABLE'])
-
-@app.route('create/<string:id>', methods=['POST'])
-def createVehicle(id):
-    response = table.put_item(Item = {'id': id, 'status': 'locked'})
-    return 'created'
+vehicleTable = dynamodb.Table(os.environ['VEHICLE_TABLE'])
+tripTable = dynamodb.Table(os.environ['TRIP_TABLE'])
 
 @app.route('lock/<string:code>', methods=['POST'])
 def lock(code):
@@ -19,7 +16,7 @@ def lock(code):
         vehicletype, provider, id = code.split(":", 3)
         data = request.get_json(force=True)
         userid = data['user']
-        response = table.get_item(Key = {'id': id})
+        response = vehicleTable.get_item(Key = {'id': id})
     except ClientError as e:
         # Vehicle doesn't exist in our database
         return jsonify({'error':'This vehicle cannot be recognized'}), 404
@@ -35,7 +32,7 @@ def lock(code):
             else:
                 # All right, lock the vehicle
                 # TODO: Check this using Blockchain
-                response = table.update_item(
+                response = vehicleTable.update_item(
                     Key={'id': str(id)},
                     UpdateExpression='SET #st = :val',
                     ExpressionAttributeValues={":val": "AVAILABLE"},
@@ -51,10 +48,9 @@ def unlock(code):
     try:
         vehicletype, provider, id = code.split(":", 3)
         print(request.get_json(force=True))
-        response = table.get_item(
+        response = vehicleTable.get_item(
             Key={'id': str(id)}
         )
-        print(response)
     except ClientError as e:
         # Vehicle doesn't exist in our database
         return jsonify({'error':'This vehicle cannot be recognized'}), 404
@@ -62,7 +58,6 @@ def unlock(code):
         # Vehicle found
         vehicle = response['Item']
         # Check the status
-        print(vehicle['status'])
         if vehicle['status'] != 'AVAILABLE':
             # Vehicle is not available for use
             return jsonify({'error':'This vehicle is not available to use'}), 409
@@ -74,7 +69,7 @@ def unlock(code):
             if providerResponse['status'] != 'AVAILABLE':
                 return jsonify({'error':'This vehicle is not available to use'}), 409
             else:
-                response = table.update_item(
+                response = vehicleTable.update_item(
                     Key={'id': str(id)},
                     UpdateExpression='SET #st = :val',
                     ExpressionAttributeValues={":val": "LOCKED"},
@@ -82,4 +77,27 @@ def unlock(code):
                     ReturnValues="UPDATED_NEW"
                 )
                 return jsonify({'message':'Vehicle unlocked, enjoy your trip!'}), 200
+
+def createTrip(id, user, startCoords, endCoords, startTime, endTime, vehicleType):
+    data = request.get_json(force=True)
+
+    distance = distanceInKmBetweenCoordinates(startCoords, endCoords)
+    cost = costOfTransport(distance, minutes, vehicleType)
+    carbon = carbonFootprint(distance, vehicleType)
+    score = (distance / carbon) * 1000
+
+    response = tripTable.put_item(
+        Item={
+            'id': id,
+            'carbon': carbon,
+            'cost': cost,
+            'distance': distance,
+            'score': score,
+            'tripUser': user,
+            'endCoords': endCoords,
+            'startCoords': startCoords,
+            'endTime': endCoords,
+            'startTime': startTime
+        }
+    )
 
