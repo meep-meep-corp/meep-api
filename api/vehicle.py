@@ -55,7 +55,8 @@ def lock(code):
 def unlock(code):
     try:
         vehicletype, provider, id = code.split(":", 3)
-        print(request.get_json(force=True))
+        data = request.get_json(force=True)
+        userid = data['user']
         response = vehicleTable.get_item(
             Key={'id': str(id)}
         )
