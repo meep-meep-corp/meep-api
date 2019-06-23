@@ -8,7 +8,7 @@ provider:
   name: aws
   runtime: python3.6
   stage: v1
-  region: eu-central-1
+  region: us-east-1
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -19,11 +19,11 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource:
-        - "arn:aws:dynamodb:eu-central-1:712196630605:table/Provider-4adrckwckzhjzfl47kknke3uvm-dev"
-        - "arn:aws:dynamodb:eu-central-1:712196630605:table/Trip-4adrckwckzhjzfl47kknke3uvm-dev"
-        - "arn:aws:dynamodb:eu-central-1:712196630605:table/User-4adrckwckzhjzfl47kknke3uvm-dev"
-        - "arn:aws:dynamodb:eu-central-1:712196630605:table/Vehicle-4adrckwckzhjzfl47kknke3uvm-dev"
-        - "arn:aws:dynamodb:eu-central-1:712196630605:table/Trip-4adrckwckzhjzfl47kknke3uvm-dev/index/gsi-UserTrips"
+        - "arn:aws:dynamodb:us-east-1:712196630605:table/Provider-i4pi7s6a5ffrje6cszpdh2v76u-prod"
+        - "arn:aws:dynamodb:us-east-1:712196630605:table/Trip-i4pi7s6a5ffrje6cszpdh2v76u-prod"
+        - "arn:aws:dynamodb:us-east-1:712196630605:table/User-i4pi7s6a5ffrje6cszpdh2v76u-prod"
+        - "arn:aws:dynamodb:us-east-1:712196630605:table/Vehicle-i4pi7s6a5ffrje6cszpdh2v76u-prod"
+        - "arn:aws:dynamodb:us-east-1:712196630605:table/Trip-i4pi7s6a5ffrje6cszpdh2v76u-prod/index/gsi-UserTrips"
   environment:
     VEHICLE_TABLE: ${self:custom.vehicleTable}
     PROVIDER_TABLE: ${self:custom.providerTable}
@@ -32,10 +32,10 @@ provider:
     BLOCKCHAIN_URL: ${self:custom.blockchainUrl}
 
 custom:
-  vehicleTable: 'Vehicle-4adrckwckzhjzfl47kknke3uvm-dev'
-  providerTable: 'Provider-4adrckwckzhjzfl47kknke3uvm-dev'
-  tripTable: 'Trip-4adrckwckzhjzfl47kknke3uvm-dev'
-  userTable: 'User-4adrckwckzhjzfl47kknke3uvm-dev'
+  vehicleTable: 'Vehicle-i4pi7s6a5ffrje6cszpdh2v76u-prod'
+  providerTable: 'Provider-i4pi7s6a5ffrje6cszpdh2v76u-prod'
+  tripTable: 'Trip-i4pi7s6a5ffrje6cszpdh2v76u-prod'
+  userTable: 'User-i4pi7s6a5ffrje6cszpdh2v76u-prod'
   blockchainUrl: 'http://ec2-34-228-255-113.compute-1.amazonaws.com:3000/donors'
   wsgi:
     app: api/app.app

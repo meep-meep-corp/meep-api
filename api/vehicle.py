@@ -9,7 +9,7 @@ from flask import Blueprint, Response, jsonify, request
 from utils import distanceInKmBetweenCoordinates, carbonFootprint, costOfTransport
 
 app = Blueprint('vehicle', __name__, url_prefix='/vehicle')
-dynamodb = boto3.resource('dynamodb', region_name='eu-central-1')
+dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
 vehicleTable = dynamodb.Table(os.environ['VEHICLE_TABLE'])
 tripTable = dynamodb.Table(os.environ['TRIP_TABLE'])
 

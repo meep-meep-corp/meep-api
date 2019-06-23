@@ -8,8 +8,7 @@ from botocore.exceptions import ClientError
 from flask import Blueprint, Response, jsonify, request
 
 app = Blueprint('trip', __name__, url_prefix='/trip')
-# dbclient = boto3.client('dynamodb', region_name='eu-central-1')
-dynamodb = boto3.resource('dynamodb', region_name='eu-central-1')
+dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
 tripTable = dynamodb.Table(os.environ['TRIP_TABLE'])
 userTable = dynamodb.Table(os.environ['USER_TABLE'])
 TRIP_TABLE = os.environ['TRIP_TABLE']
