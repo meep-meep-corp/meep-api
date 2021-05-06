@@ -2,7 +2,7 @@ Flask==1.0.3
 requests==2.22.0
 lxml==4.3.3
 boto3==1.9.174
-Flask-Cors==3.0.8
+Flask-Cors==3.0.9
 
 # Pillow is for mongoengine image field
 Pillow==6.0.0
