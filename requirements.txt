@@ -5,7 +5,7 @@ boto3==1.9.174
 Flask-Cors==3.0.8
 
 # Pillow is for mongoengine image field
-Pillow==6.0.0
+Pillow==9.0.1
 
 # Used to parse datauri fields
 w3lib==1.20.0
